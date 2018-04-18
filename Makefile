@@ -8,7 +8,7 @@ em4rtest: em4rtest.cpp
 
 clean:
 	rm -f em4rtest
-	rm em4-start
-	rm em4-reset
-	rm em4-resume
+	rm -f em4-start
+	rm -f em4-reset
+	rm -f em4-resume
 	

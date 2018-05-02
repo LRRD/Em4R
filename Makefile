@@ -1,14 +1,14 @@
 PROGRAM=gcc
 
-em4rtest: em4rtest.cpp
-	g++ em4rtest.cpp -o em4rtest
-	ln -s em4rtest em4-start
-	ln -s em4rtest em4-resume
-	ln -s em4rtest em4-reset
+em4r: em4r.cpp
+	g++ em4r.cpp -o em4r
+
+install:
+	g++ em4r.cpp -o /usr/bin/em4r
 
 clean:
-	rm -f em4rtest
-	rm -f em4-start
-	rm -f em4-reset
-	rm -f em4-resume
+	rm -f em4r
+
+remove:
+	rm -f /usr/bin/em4r	
 	

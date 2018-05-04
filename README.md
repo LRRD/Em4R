@@ -42,7 +42,7 @@ Simply running
 
 will compile the program into the current directory, and is executable using `./em4r`. To remove, just run 
 
-`make clean`
+`$make clean`
 
 If you want to install system wide, run
 

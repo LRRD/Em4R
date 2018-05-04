@@ -2,7 +2,7 @@
 ## Program for communicating with the Em4R Robotic Dual-Tilt Stream table
 
 
-###Running scripts
+### Running scripts
 You can now call the program from any directory. To run a script, simply type
 
 `$em4r start "script-name"`
@@ -10,11 +10,11 @@ You can now call the program from any directory. To run a script, simply type
 Scripts are no longer stored in the working directory, and can instead be found in the folder
  `~/Desktop/em4r_scripts`
 
-###Homing the Table
+### Homing the Table
 There is now a home functionality, allowing you to set the pitch, roll, and flow to 0, and the standpipe to 100 using
 `$em4r home`
 
-###Jogging to Specific Values
+### Jogging to Specific Values
 You can set any operator to a specific value using the jog function.
 
 `$em4r jog "operator" "value" "time"`

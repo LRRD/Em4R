@@ -87,7 +87,7 @@ if [ $exitstatus -eq 0 ]; then
         
         " 0 0 0
         echo "Perform an operation with this"
-        em4r -s $filename
+        em4r start $filename
         echo "test?"
     fi
 else

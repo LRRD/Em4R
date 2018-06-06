@@ -12,6 +12,7 @@ Scripts are no longer stored in the working directory, and can instead be found 
 
 ### Homing the Table
 There is now a home functionality, allowing you to set the pitch, roll, and flow to 0, and the standpipe to 100 using
+
 `$em4r home`
 
 ### Jogging to Specific Values

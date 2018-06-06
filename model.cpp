@@ -10,7 +10,7 @@
 #include <list>
 
 
-#define	MIN_PITCH	-15	// -15 degrees
+#define	MIN_PITCH	-30	// -15 degrees
 #define	MAX_PITCH	35	// 3.5 degrees
 #define	MIN_ROLL	-36	// -3.6 degrees
 #define	MAX_ROLL	36	// 3.6 degrees

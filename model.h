@@ -19,7 +19,7 @@
 #define	MODE_CHILL	9	// random w/o pump, minor movement
 #define MODE_JOG	10 //jog to values
 #define MODE_HOME	11 //home all operators to 0
-
+#define MODE_DRAIN	12 //Drain model slowly
 struct script_step_t
 {
 	// Time in seconds

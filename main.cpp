@@ -4,11 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-
-
-
-
+#include <unistd.h>
 
 
 int main(int argc, char** argv)
@@ -49,6 +45,7 @@ int main(int argc, char** argv)
 	int mode = 0;
 	if (strstr(argv[1], "reset")) {
 		mode = MODE_RESET;
+	//Script selection handling
 	} else if (strstr(argv[1], "start")) {
 		if (argc <= 1) {
 			printf("Must specify script name\n");
@@ -60,6 +57,7 @@ int main(int argc, char** argv)
 		home_path = getenv ("HOME");
 		folder_path = home_path + "/Desktop/em4r_scripts/";
 		script_path = folder_path + script_name;
+		//Return 1 if script does not exist
 		if (!script.read(script_path)) {
 			return 1;
 		}
@@ -90,13 +88,13 @@ int main(int argc, char** argv)
 		savefile_name = std::string(".") + script_name + std::string(".save");
 		FILE* savefile = fopen(savefile_name.c_str(), "rt");
 		if (!savefile) {
-			printf("Could not find save file; try em4-start instead\n");
+			printf("Could not find save file; try em4r start instead\n");
 			return 1;
 		}
 		if (5 != fscanf(savefile, "%u,%d,%d,%d,%d", &restart_step.seconds,
 				&restart_step.pitch, &restart_step.roll,
 				&restart_step.pipe, &restart_step.flow)) {
-			printf("Error in save file; try em4-start instead\n");
+			printf("Error in save file; try em4r start instead\n");
 			return 1;
 		}
 		fclose(savefile);
@@ -119,9 +117,9 @@ int main(int argc, char** argv)
 		mode = MODE_JOG;
 	} else if (strstr(argv[1], "home")){
 		mode = MODE_HOME;
-	} else if (strstr(argv[1], "em4-hipitch")) {
+	} else if (strstr(argv[1], "hipitch")) {
 		mode = MODE_HIPITCH;
-	} else if (strstr(argv[1], "em4-maxmove")) {
+	} else if (strstr(argv[1], "maxmove")) {
 		mode = MODE_MAXMOVE;
 	} else if (strstr(argv[1], "encmon")) {
 		mode = MODE_ENCMON;
@@ -129,10 +127,13 @@ int main(int argc, char** argv)
 		mode = MODE_RANDOM;
 	} else if (strstr(argv[1], "randomdry")) {
 		mode = MODE_RANDOMDRY;
+	} else if (strstr(argv[1], "drain")) {
+		mode = MODE_DRAIN;
 	}
 
 //Main block for function calls
 	try {
+		//Initialise connection with model control box
 		model em4r("10.0.8.200", 40000);
 
 		printf("Model Initialized\n");
@@ -180,6 +181,10 @@ int main(int argc, char** argv)
 		else if ((mode == MODE_START) || (mode == MODE_RESUME)) {
 			em4r.reset();
 			em4r.run_script(script, savefile_name, exp_clock);
+		}
+		else if (mode==MODE_DRAIN) {
+			em4r.jog("pipe", 0, 180000);
+			em4r.jog("pitch", 35, 300000);
 		}
 		else {
 			printf("\nno instructions given");

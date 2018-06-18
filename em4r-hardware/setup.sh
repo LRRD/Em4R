@@ -1,5 +1,10 @@
 
-source common.sh
+source ./common.sh
+export EM4R_BUILD=./em4r-build
+export EM4R_DOWNLOAD=./em4r-download
+export EM4R_SERIAL=/dev/ttyACM0
+
+
 
 echo ""
 echo ""

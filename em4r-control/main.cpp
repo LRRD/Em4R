@@ -179,7 +179,7 @@ int main(int argc, char** argv)
 			em4r.encoder_monitor();
 		}
 		else if ((mode == MODE_START) || (mode == MODE_RESUME)) {
-			em4r.reset();
+			//em4r.reset();
 			em4r.run_script(script, savefile_name, exp_clock);
 		}
 		else if (mode==MODE_DRAIN) {

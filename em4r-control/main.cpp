@@ -183,6 +183,7 @@ int main(int argc, char** argv)
 			em4r.run_script(script, savefile_name, exp_clock);
 		}
 		else if (mode==MODE_DRAIN) {
+			em4r.jog("flow", 0, 0);
 			em4r.jog("pipe", 0, 180000);
 			em4r.jog("pitch", 35, 300000);
 		}

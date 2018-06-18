@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_gpYRILBOEeeoV-tki4Zc-Q">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_hDKqILBOEeeoV-tki4Zc-Q" featurename="children" parentElementId="com.elmocity.elib.main.partstack.debug">
+    <elements xsi:type="basic:Part" xmi:id="_khWBMLBOEeeoV-tki4Zc-Q" elementId="com.elmocity.ss.histfin.part.histfinpart" contributionURI="bundleclass://com.elmocity.ss.histfin/com.elmocity.ss.histfin.parts.BasicHistPart" label="HistFin Part"/>
+    <elements xsi:type="basic:Part" xmi:id="_XIAXgLkgEeege8YEVh53dg" elementId="com.elmocity.ss.histfin.part.stockmove" contributionURI="bundleclass://com.elmocity.ss.histfin/com.elmocity.ss.histfin.parts.HistFinStockMovePart" label="Stock Move"/>
+    <elements xsi:type="basic:Part" xmi:id="_TeAsYLmsEeeF08jyqKBD8A" elementId="com.elmocity.ss.histfin.part.histdownload" contributionURI="bundleclass://com.elmocity.ss.histfin/com.elmocity.ss.histfin.parts.DownloadIBDataPart" label="Hist Download"/>
+  </fragments>
+</fragment:ModelFragments>

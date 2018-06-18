@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_IoWagLxWEeer97sz2PEZAg">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_I_l10LxWEeer97sz2PEZAg" featurename="children" parentElementId="com.elmocity.elib.main.partstack.debug">
+    <elements xsi:type="basic:Part" xmi:id="_VkybwLxWEeer97sz2PEZAg" elementId="com.elmocity.elib.ui.part.main" contributionURI="bundleclass://com.elmocity.elib.ui/com.elmocity.elib.ui.parts.MainPart" label="ELib Main"/>
+    <elements xsi:type="basic:Part" xmi:id="_DAcq4L0nEeeY4ed42CGvQA" elementId="com.elmocity.elib.ui.part.elibchart" contributionURI="bundleclass://com.elmocity.elib.ui/com.elmocity.elib.ui.parts.ChartPart" label="Elib Chart"/>
+    <elements xsi:type="basic:Part" xmi:id="_JN2L0L0oEeeY4ed42CGvQA" elementId="com.elmocity.elib.ui.part.elibswt" contributionURI="bundleclass://com.elmocity.elib.ui/com.elmocity.elib.ui.parts.SWTPart" label="ELib SWT"/>
+    <elements xsi:type="basic:Part" xmi:id="_M_i70L0oEeeY4ed42CGvQA" elementId="com.elmocity.elib.ui.part.jobs" contributionURI="bundleclass://com.elmocity.elib.ui/com.elmocity.elib.ui.parts.JobManagerPart" label="Jobs" iconURI="platform:/plugin/com.elmocity.elib.swt/images/sleeping.gif"/>
+  </fragments>
+</fragment:ModelFragments>

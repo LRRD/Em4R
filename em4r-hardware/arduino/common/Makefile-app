@@ -1,0 +1,144 @@
+# Generic Makefile for applications
+
+# The location of the top-level Makefile.
+M := $(realpath $(dir $(word $(words $(MAKEFILE_LIST)), $(MAKEFILE_LIST))))
+
+# Include common Makefile settings.
+include $(M)/../../common/Makefile.inc
+
+# Include any local settings (optional).
+# This generally sets EXTRA_INCLUDES and/or EXTRA_LIBS.
+-include $(M)/MakeSettings.inc
+
+# Get the name of the project diretory.
+PROJECT := $(notdir $(M))
+
+# Path to the Arduino serial port, which can be locally overridden.
+ifneq (,$(findstring upload2, $(MAKECMDGOALS)))
+  ifeq (,$(ARDUINO_SERIAL2))
+    ifneq (,$(wildcard /dev/ttyACM1))
+      ARDUINO_SERIAL2=/dev/ttyACM1
+      $(info ARDUINO_SERIAL2 not set; assuming /dev/ttyACM1)
+    else
+      $(error ARDUINO_SERIAL2 not set; cannot upload)
+    endif
+  endif
+else
+  ifneq (,$(findstring upload, $(MAKECMDGOALS)))
+    ifeq (,$(ARDUINO_SERIAL))
+      ifneq (,$(wildcard /dev/ttyACM0))
+        ARDUINO_SERIAL=/dev/ttyACM0
+        $(info ARDUINO_SERIAL not set; assuming /dev/ttyACM0)
+      else
+        $(error ARDUINO_SERIAL not set; cannot upload)
+      endif
+    endif
+  endif
+endif
+
+# Libraries.  NOTE: core must be listed last since everything depends on it.
+LIBRARY_NAMES := $(EXTRA_LIBRARIES) core
+LIBRARY_FILES := $(foreach lib, $(LIBRARY_NAMES), $(M)/../../libs/$(lib)/$(lib).a)
+$(info LIBRARY_FILES = $(LIBRARY_FILES))
+
+# Look up the LIB_SRC specification in the MakeSettings.inc for each included library, and add that directory as an include directory.
+# This means that you don't have to explicitly list the library source directory in EXTRA_INCLUDES, as long all includes are in the source directory.
+$(eval LIBRARY_INCLUDES = $(foreach lib, $(LIBRARY_NAMES), $(strip -I$(strip $(patsubst :=,,$(patsubst =,,$(patsubst LIB_SRC,,$(shell grep LIB_SRC $(M)/../../libs/$(lib)/MakeSettings.inc | grep -v LIB_SRC_))))))))
+$(info LIBRARY_INCLUDES = $(LIBRARY_INCLUDES))
+
+# All local includes.
+H_SRCFILES := $(notdir $(shell find . -name \*.h))
+
+# All assembly, C and CPP source files
+S_SRCFILES := $(notdir $(shell find . -name \*.S))
+C_SRCFILES := $(notdir $(shell find . -name \*.c))
+CXX_SRCFILES := $(notdir $(shell find . -name \*.cpp))
+
+# All object files
+S_OBJFILES := $(patsubst %.S,%.o,$(S_SRCFILES))
+C_OBJFILES := $(patsubst %.c,%.o,$(C_SRCFILES))
+CXX_OBJFILES := $(patsubst %.cpp,%.o,$(CXX_SRCFILES))
+$(info OBJECTS: $(S_OBJFILES) $(C_OBJFILES) $(CXX_OBJFILES))
+
+# Flags for assembly
+SFLAGS := -x assembler-with-cpp -flto \
+	-MMD -mmcu=atmega2560 \
+	-DF_CPU=16000000L -DARDUINO=10805 -DARDUINO_AVR_MEGA2560 -DARDUINO_ARCH_AVR \
+	-I$(LIB_CORE_SRC) -I$(LIB_VAR_SRC) $(LIBRARY_INCLUDES) $(EXTRA_INCLUDES)
+
+# Flags for C compilation
+CFLAGS := -w -Os -g -std=gnu11 \
+	-ffunction-sections -fdata-sections \
+	-flto -fno-fat-lto-objects \
+	-MMD -mmcu=atmega2560 \
+	-DF_CPU=16000000L -DARDUINO=10805 -DARDUINO_AVR_MEGA2560 -DARDUINO_ARCH_AVR \
+	-I../common \
+	-I$(LIB_CORE_SRC) -I$(LIB_VAR_SRC) $(LIBRARY_INCLUDES) $(EXTRA_INCLUDES)
+
+# Flags for C++ compilation
+CXXFLAGS := -w -Os -g -std=gnu++14 \
+	-ffunction-sections -fdata-sections -fno-threadsafe-statics -fno-exceptions \
+	-flto \
+	-MMD -mmcu=atmega2560 \
+	-DF_CPU=16000000L -DARDUINO=10805 -DARDUINO_AVR_MEGA2560 -DARDUINO_ARCH_AVR \
+	-I../common \
+	-I$(LIB_CORE_SRC) -I$(LIB_VAR_SRC) $(LIBRARY_INCLUDES) $(EXTRA_INCLUDES)
+
+# Flags for linking
+LDFLAGS := -w -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections,--relax -mmcu=atmega2560
+
+# All header files
+HDRFILES := $(notdir $(shell find . -type f -name \*.h))
+
+.PHONY : clean all
+
+all:	$(PROJECT).hex
+
+clean:
+	# Delete build artifacts
+	rm -f *.hex *.elf *.eep *.o *.d
+
+# .S -> .o implicit rule
+%.o: %.S Makefile $(H_SRCFILES)
+	# Assemble $<
+	$(AVR_CC) $(LDFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# .c -> .o implicit rule
+%.o: %.c Makefile $(H_SRCFILES)
+	# Compile $<
+	$(AVR_CC) $(LDFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# .cpp -> .o implicit rule
+%.o: %.cpp Makefile $(H_SRCFILES)
+	# Compile $<
+	$(AVR_CXX) $(LDFLAGS) $(CXXFLAGS) -MMD -MP -c $< -o $@
+
+# The EEPROM file for programming (only applicable if data has been added to the AVR's internal EEPROM)
+%.eep: %.elf
+	# Output the .eeprom section to the .eep file
+	$(AVR_OBJCOPY) -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings \
+		--change-section-lma .eeprom=0 $< $(PROJECT).eep
+
+# The final executable
+$(PROJECT).elf: $(S_OBJFILES) $(C_OBJFILES) $(CXX_OBJFILES) $(LIBRARY_FILES)
+	# Link ELF executable
+	$(AVR_CXX) $(LDFLAGS) -o $(PROJECT).elf $(S_OBJFILES) $(C_OBJFILES) $(CXX_OBJFILES) $(LIBRARY_FILES) -lm
+
+# The HEX file for programming
+%.hex: %.elf
+	# Generate $@ from $<
+	$(AVR_OBJCOPY) -O ihex -R .eeprom $< $@
+
+# Upload to the Arduino MEGA 2560 (or compatible) using the STK500 v2
+# communication protocol.  (See www.atmel.com/images/doc2591.pdf).
+upload:	$(PROJECT).hex
+	$(AVR_DUDE) \
+		-C$(ARDUINO_ROOT)/hardware/tools/avr/etc/avrdude.conf \
+		-v -patmega2560 -cwiring -P$(ARDUINO_SERIAL) -b115200 -D \
+		-Uflash:w:$(PROJECT).hex:i 
+
+upload2: $(PROJECT).hex
+	$(AVR_DUDE) \
+		-C$(ARDUINO_ROOT)/hardware/tools/avr/etc/avrdude.conf \
+		-v -patmega2560 -cwiring -P$(ARDUINO_SERIAL2) -b115200 -D \
+		-Uflash:w:$(PROJECT).hex:i 

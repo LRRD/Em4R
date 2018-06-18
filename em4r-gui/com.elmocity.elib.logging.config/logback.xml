@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+
+  <!-- set up the application context, useful if different application were logging to the same syslog or sql table -->
+  <contextName>EMRiverApp</contextName>
+ 
+  <timestamp key="bySecond" datePattern="yyyyMMdd'_'HHmmss"/>
+   
+   
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level [%-15.15thread] %-6.6logger %-32(\(%file:%line\)) - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="TOFILE" class="ch.qos.logback.core.FileAppender">
+  	<file>C://EMRiver//log//EMR_${bySecond}.txt</file>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5.5level [%-15.15thread] %-16.16logger %-20.20file %-6.6line - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- root logger is the top of the tree of loggers, all others created programmatically in the code descend from this --> 
+  <root level="TRACE">
+    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="TOFILE" />
+  </root>
+</configuration>
+

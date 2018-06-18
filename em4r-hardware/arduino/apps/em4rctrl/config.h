@@ -1,0 +1,14 @@
+
+#define CONFIG_NET	1
+#define CONFIG_LINK	1
+#define CONFIG_SIM	0
+#define	CONFIG_LOG	0
+
+#define CONFIG_ENCODERS	1
+#define	CONFIG_ADCTEST	0
+
+#define CONFIG_PITCH	1
+#define CONFIG_ROLL	1
+#define CONFIG_PIPE	1
+#define CONFIG_PUMP	1
+#define CONFIG_TILT	1

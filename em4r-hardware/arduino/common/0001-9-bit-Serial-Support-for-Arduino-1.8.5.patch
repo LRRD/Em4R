@@ -1,0 +1,237 @@
+From 377393d8a23b4cee3bc791185d04992664263a0f Mon Sep 17 00:00:00 2001
+From: Christopher Alix <alix@prairiecity.com>
+Date: Thu, 16 Nov 2017 22:22:24 -0600
+Subject: [PATCH] 9-bit Serial Support for Arduino 1.8.5
+
+---
+ .../arduino/avr/cores/arduino/HardwareSerial.cpp   | 47 ++++++++++++++++++++--
+ .../arduino/avr/cores/arduino/HardwareSerial.h     | 22 +++++++---
+ .../avr/cores/arduino/HardwareSerial_private.h     | 15 +++++++
+ 3 files changed, 76 insertions(+), 8 deletions(-)
+
+diff --git a/hardware/arduino/avr/cores/arduino/HardwareSerial.cpp b/hardware/arduino/avr/cores/arduino/HardwareSerial.cpp
+index 5cd89e5..3c74158 100644
+--- a/hardware/arduino/avr/cores/arduino/HardwareSerial.cpp
++++ b/hardware/arduino/avr/cores/arduino/HardwareSerial.cpp
+@@ -82,6 +82,13 @@ void HardwareSerial::_tx_udr_empty_irq(void)
+ {
+   // If interrupts are enabled, there must be more data in the output
+   // buffer. Send the next byte
++  if (_ninebit) {
++    if (_tx_buffer[_tx_buffer_tail >> 3] & (1U << (_tx_buffer_tail & 0x7))) {
++      sbi(*_ucsrb, TXB80);
++    } else {
++      cbi(*_ucsrb, TXB80);
++    }
++  }
+   unsigned char c = _tx_buffer[_tx_buffer_tail];
+   _tx_buffer_tail = (_tx_buffer_tail + 1) % SERIAL_TX_BUFFER_SIZE;
+ 
+@@ -99,6 +106,7 @@ void HardwareSerial::_tx_udr_empty_irq(void)
+ }
+ 
+ // Public Methods //////////////////////////////////////////////////////////////
++    extern void debug_printf(uint32_t, const char*, ...);
+ 
+ void HardwareSerial::begin(unsigned long baud, byte config)
+ {
+@@ -123,11 +131,23 @@ void HardwareSerial::begin(unsigned long baud, byte config)
+ 
+   _written = false;
+ 
++  // check for 9-bit kludge mode.
++  _ninebit = (config & 0x80U);
++  config &= ~0x80U;
++  if (_ninebit) {
++    debug_printf(1, "Serial port in 9-bit mode");
++  }
++
+   //set the data bits, parity, and stop bits
+ #if defined(__AVR_ATmega8__)
+   config |= 0x80; // select UCSRC register (shared with UBRRH)
+ #endif
+   *_ucsrc = config;
++  if (_ninebit) {
++    sbi(*_ucsrb, UCSZ02);
++  } else {
++    cbi(*_ucsrb, UCSZ02);
++  }
+   
+   sbi(*_ucsrb, RXEN0);
+   sbi(*_ucsrb, TXEN0);
+@@ -159,6 +179,10 @@ int HardwareSerial::peek(void)
+   if (_rx_buffer_head == _rx_buffer_tail) {
+     return -1;
+   } else {
++    int c = _rx_buffer[_rx_buffer_tail];
++    if (_ninebit && (_rx_bit8_buffer[_rx_buffer_tail >> 3] & (1U << (_rx_buffer_tail & 0x7)))) {
++      c |= 0x100;
++    }
+     return _rx_buffer[_rx_buffer_tail];
+   }
+ }
+@@ -169,7 +193,10 @@ int HardwareSerial::read(void)
+   if (_rx_buffer_head == _rx_buffer_tail) {
+     return -1;
+   } else {
+-    unsigned char c = _rx_buffer[_rx_buffer_tail];
++    int c = _rx_buffer[_rx_buffer_tail];
++    if (_ninebit && (_rx_bit8_buffer[_rx_buffer_tail >> 3] & (1U << (_rx_buffer_tail & 0x7)))) {
++      c |= 0x100;
++    }
+     _rx_buffer_tail = (rx_buffer_index_t)(_rx_buffer_tail + 1) % SERIAL_RX_BUFFER_SIZE;
+     return c;
+   }
+@@ -210,7 +237,7 @@ void HardwareSerial::flush()
+   // the hardware finished tranmission (TXC is set).
+ }
+ 
+-size_t HardwareSerial::write(uint8_t c)
++size_t HardwareSerial::write(int c)
+ {
+   _written = true;
+   // If the buffer and the data register is empty, just write the byte
+@@ -218,7 +245,14 @@ size_t HardwareSerial::write(uint8_t c)
+   // significantly improve the effective datarate at high (>
+   // 500kbit/s) bitrates, where interrupt overhead becomes a slowdown.
+   if (_tx_buffer_head == _tx_buffer_tail && bit_is_set(*_ucsra, UDRE0)) {
+-    *_udr = c;
++    if (_ninebit) {
++       if (c & 0x100) {
++         sbi(*_ucsrb, TXB80);
++       } else {
++         cbi(*_ucsrb, TXB80);
++       }
++    }
++    *_udr = c & 0xFF;
+     sbi(*_ucsra, TXC0);
+     return 1;
+   }
+@@ -239,6 +273,13 @@ size_t HardwareSerial::write(uint8_t c)
+     }
+   }
+ 
++  if (_ninebit) {
++    if (c & 0x100) {
++      _tx_bit8_buffer[_tx_buffer_head >> 3] |= (1U << (_tx_buffer_head & 0x7));
++    } else {
++      _tx_bit8_buffer[_tx_buffer_head >> 3] &= ~(1U << (_tx_buffer_head & 0x7));
++    }
++  }
+   _tx_buffer[_tx_buffer_head] = c;
+   _tx_buffer_head = i;
+ 	
+diff --git a/hardware/arduino/avr/cores/arduino/HardwareSerial.h b/hardware/arduino/avr/cores/arduino/HardwareSerial.h
+index 17000c2..4615cc1 100644
+--- a/hardware/arduino/avr/cores/arduino/HardwareSerial.h
++++ b/hardware/arduino/avr/cores/arduino/HardwareSerial.h
+@@ -89,6 +89,13 @@ typedef uint8_t rx_buffer_index_t;
+ #define SERIAL_6O2 0x3A
+ #define SERIAL_7O2 0x3C
+ #define SERIAL_8O2 0x3E
++// 9-bit kludge values.
++#define	SERIAL_9N1 0x86
++#define	SERIAL_9N2 0x8E
++#define	SERIAL_9E1 0xA6
++#define	SERIAL_9E2 0xAE
++#define	SERIAL_9O1 0xB6
++#define	SERIAL_9O2 0xBE
+ 
+ class HardwareSerial : public Stream
+ {
+@@ -102,6 +109,11 @@ class HardwareSerial : public Stream
+     // Has any byte been written to the UART since begin()
+     bool _written;
+ 
++    // Is this port in 9-bit mode?
++    bool _ninebit;
++    unsigned char _rx_bit8_buffer[SERIAL_RX_BUFFER_SIZE / 8];
++    unsigned char _tx_bit8_buffer[SERIAL_TX_BUFFER_SIZE / 8];
++
+     volatile rx_buffer_index_t _rx_buffer_head;
+     volatile rx_buffer_index_t _rx_buffer_tail;
+     volatile tx_buffer_index_t _tx_buffer_head;
+@@ -126,11 +138,11 @@ class HardwareSerial : public Stream
+     virtual int read(void);
+     virtual int availableForWrite(void);
+     virtual void flush(void);
+-    virtual size_t write(uint8_t);
+-    inline size_t write(unsigned long n) { return write((uint8_t)n); }
+-    inline size_t write(long n) { return write((uint8_t)n); }
+-    inline size_t write(unsigned int n) { return write((uint8_t)n); }
+-    inline size_t write(int n) { return write((uint8_t)n); }
++    virtual size_t write(int n);
++    inline size_t write(uint8_t n) { return write((int)n); }
++    inline size_t write(unsigned long n) { return write((int)n); }
++    inline size_t write(long n) { return write((int)n); }
++    inline size_t write(unsigned int n) { return write((int)n); }
+     using Print::write; // pull in write(str) and write(buf, size) from Print
+     operator bool() { return true; }
+ 
+diff --git a/hardware/arduino/avr/cores/arduino/HardwareSerial_private.h b/hardware/arduino/avr/cores/arduino/HardwareSerial_private.h
+index 761a5e5..13c9c73 100644
+--- a/hardware/arduino/avr/cores/arduino/HardwareSerial_private.h
++++ b/hardware/arduino/avr/cores/arduino/HardwareSerial_private.h
+@@ -43,6 +43,9 @@
+ #define TXC0 TXC
+ #define RXEN0 RXEN
+ #define TXEN0 TXEN
++#define UCSZ02 UCSZ2
++#define RXB80 RXB8
++#define TXB80 TXB8
+ #define RXCIE0 RXCIE
+ #define UDRIE0 UDRIE
+ #define U2X0 U2X
+@@ -68,16 +71,19 @@
+ // changed for future hardware.
+ #if defined(TXC1) && (TXC1 != TXC0 || RXEN1 != RXEN0 || RXCIE1 != RXCIE0 || \
+ 		      UDRIE1 != UDRIE0 || U2X1 != U2X0 || UPE1 != UPE0 || \
++		      UCSZ12 != UCSZ02 || RXB81 != RXB80 || TXB81 != TXB80 || \
+ 		      UDRE1 != UDRE0)
+ #error "Not all bit positions for UART1 are the same as for UART0"
+ #endif
+ #if defined(TXC2) && (TXC2 != TXC0 || RXEN2 != RXEN0 || RXCIE2 != RXCIE0 || \
+ 		      UDRIE2 != UDRIE0 || U2X2 != U2X0 || UPE2 != UPE0 || \
++		      UCSZ22 != UCSZ02 || RXB82 != RXB80 || TXB82 != TXB80 || \
+ 		      UDRE2 != UDRE0)
+ #error "Not all bit positions for UART2 are the same as for UART0"
+ #endif
+ #if defined(TXC3) && (TXC3 != TXC0 || RXEN3 != RXEN0 || RXCIE3 != RXCIE0 || \
+ 		      UDRIE3 != UDRIE0 || U3X3 != U3X0 || UPE3 != UPE0 || \
++		      UCSZ32 != UCSZ02 || RXB83 != RXB80 || TXB83 != TXB80 || \
+ 		      UDRE3 != UDRE0)
+ #error "Not all bit positions for UART3 are the same as for UART0"
+ #endif
+@@ -91,6 +97,7 @@ HardwareSerial::HardwareSerial(
+     _ubrrh(ubrrh), _ubrrl(ubrrl),
+     _ucsra(ucsra), _ucsrb(ucsrb), _ucsrc(ucsrc),
+     _udr(udr),
++    _ninebit(0),
+     _rx_buffer_head(0), _rx_buffer_tail(0),
+     _tx_buffer_head(0), _tx_buffer_tail(0)
+ {
+@@ -103,6 +110,7 @@ void HardwareSerial::_rx_complete_irq(void)
+   if (bit_is_clear(*_ucsra, UPE0)) {
+     // No Parity error, read byte and store it in the buffer if there is
+     // room
++    unsigned char bit8 = bit_is_set(*_ucsrb, RXB80);
+     unsigned char c = *_udr;
+     rx_buffer_index_t i = (unsigned int)(_rx_buffer_head + 1) % SERIAL_RX_BUFFER_SIZE;
+ 
+@@ -111,6 +119,13 @@ void HardwareSerial::_rx_complete_irq(void)
+     // current location of the tail), we're about to overflow the buffer
+     // and so we don't write the character or advance the head.
+     if (i != _rx_buffer_tail) {
++      if (_ninebit) {
++        if (bit8) {
++          _rx_bit8_buffer[_rx_buffer_head >> 3] |= (1U << (_rx_buffer_head & 0x7));
++        } else {
++          _rx_bit8_buffer[_rx_buffer_head >> 3] &= ~(1U << (_rx_buffer_head & 0x7));
++        }
++      }
+       _rx_buffer[_rx_buffer_head] = c;
+       _rx_buffer_head = i;
+     }
+-- 
+2.7.4
+

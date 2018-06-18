@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="com.emriver.geotable.main.window" label="EMRiver App" width="1200" height="1000">
+    <tags>shellMaximized</tags>
+    <children xsi:type="basic:PartStack" xmi:id="_ixM2UMDCEeeZjvveSkxhEg" elementId="com.emriver.geomodel.main.partstack.0">
+      <children xsi:type="basic:Part" xmi:id="_jXWQUMDCEeeZjvveSkxhEg" elementId="com.emriver.geomodel.main.part.tablepart" contributionURI="bundleclass://com.emriver.geomodel.main/com.emriver.geomodel.main.parts.TablePart" label="Table Part"/>
+      <children xsi:type="basic:Part" xmi:id="_EhKFoMWsEeeYhtDQhSPnhg" elementId="com.emriver.geomodel.main.part.device0" contributionURI="bundleclass://com.emriver.geomodel.table/com.emriver.geomodel.table.parts.TableDevicePart" label="Device 0"/>
+      <children xsi:type="basic:CompositePart" xmi:id="_UG5GIMY1EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.compositepart.0" label="CompositePart">
+        <children xsi:type="basic:PartSashContainer" xmi:id="_SGVuMMY2EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.partsashcontainer.proto">
+          <children xsi:type="basic:Part" xmi:id="_YNdS4MY1EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.part.proto" containerData="6" contributionURI="bundleclass://com.emriver.geomodel.main/com.emriver.geomodel.main.parts.TableProtoPart" label="proto"/>
+          <children xsi:type="basic:Part" xmi:id="_6JdW8MY4EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.part.pitch" containerData="15" contributionURI="bundleclass://com.emriver.geomodel.table/com.emriver.geomodel.table.parts.TableDevicePart" label="Pitch">
+            <variables>DEVICE=DEV_PITCH</variables>
+          </children>
+          <children xsi:type="basic:Part" xmi:id="_LWYA0MY3EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.part.roll" containerData="15" contributionURI="bundleclass://com.emriver.geomodel.table/com.emriver.geomodel.table.parts.TableDevicePart" label="Roll">
+            <variables>DEVICE=DEV_ROLL</variables>
+          </children>
+          <children xsi:type="basic:Part" xmi:id="_pyM0oMY4EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.part.uppipe" containerData="15" contributionURI="bundleclass://com.emriver.geomodel.table/com.emriver.geomodel.table.parts.TableDevicePart" label="Uppipe">
+            <variables>DEVICE=DEV_UPPIPE</variables>
+          </children>
+          <children xsi:type="basic:Part" xmi:id="_xZBcEMY4EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.part.downpipe" containerData="15" contributionURI="bundleclass://com.emriver.geomodel.table/com.emriver.geomodel.table.parts.TableDevicePart" label="Downpipe">
+            <variables>DEVICE=DEV_DOWNPIPE</variables>
+          </children>
+          <children xsi:type="basic:Part" xmi:id="_9RGvQMY2EeelDonsJ5XqTw" elementId="com.emriver.geomodel.main.part.pump" containerData="15" contributionURI="bundleclass://com.emriver.geomodel.table/com.emriver.geomodel.table.parts.TableDevicePart" label="Pump">
+            <variables>DEVICE=DEV_PUMP</variables>
+          </children>
+        </children>
+      </children>
+    </children>
+  </children>
+  <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
+    <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
+    <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
+  </rootContext>
+  <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
+  <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
+  <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
+  <addons xmi:id="_c3AF1cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.commands.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.CommandProcessingAddon"/>
+  <addons xmi:id="_c3AF1sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.handler.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon"/>
+  <addons xmi:id="_c3AF18jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.contexts.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.ContextProcessingAddon"/>
+  <addons xmi:id="_c3AF2MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.bindings.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.swt/org.eclipse.e4.ui.workbench.swt.util.BindingProcessingAddon"/>
+</application:Application>

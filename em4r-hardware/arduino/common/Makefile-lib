@@ -1,0 +1,93 @@
+# Generic Makefile for applications
+
+# The location of the top-level Makefile.
+M := $(realpath $(dir $(word $(words $(MAKEFILE_LIST)), $(MAKEFILE_LIST))))
+$(info M: $(M))
+
+# Include common Makefile settings.
+include $(M)/../../common/Makefile.inc
+
+# Include project-specific settings.  The included file should set:
+# LIB_SRC to the directory containing the source files, which have have a "utility" subdirectory.
+# EXTRA_INCLUDES to include any other libraries (e.g., $(LIB_SPI_SRC)).
+include $(M)/MakeSettings.inc
+
+# Get the name of the project diretory, which will be the name of the .a file.
+PROJECT := $(notdir $(M))
+
+# Find all assembly, C and CPP source files
+S_SRCFILES := $(notdir $(shell find $(LIB_SRC) -name \*.S))
+C_SRCFILES := $(notdir $(shell find $(LIB_SRC) -name \*.c))
+CXX_SRCFILES := $(notdir $(shell find $(LIB_SRC) -name \*.cpp))
+$(info LIB_SRC: $(LIB_SRC))
+$(info LIB_SRC_SUBDIRS: $(LIB_SRC_SUBDIRS))
+$(info SOURCES: $(S_SRCFILES) $(C_SRCFILES) $(CXX_SRCFILES))
+
+# Find all object files
+S_OBJFILES := $(patsubst %.S,%.S.o,$(S_SRCFILES))
+C_OBJFILES := $(patsubst %.c,%.c.o,$(C_SRCFILES))
+CXX_OBJFILES := $(patsubst %.cpp,%.cpp.o,$(CXX_SRCFILES))
+OBJECTS := $(S_OBJFILES) $(C_OBJFILES) $(CXX_OBJFILES)
+$(info OBJECTS: $(OBJECTS))
+
+# Flags for assembly
+SFLAGS := -x assembler-with-cpp -flto \
+	-MMD -mmcu=atmega2560 \
+	-DF_CPU=16000000L -DARDUINO=10805 -DARDUINO_AVR_MEGA2560 -DARDUINO_ARCH_AVR \
+	-I$(LIB_SRC) -I$(LIB_CORE_SRC) -I$(LIB_VAR_SRC) -I$(EXTRA_INCLUDES)
+
+# Flags for C compilation
+CFLAGS := -c -g -Os -w -std=gnu11 -fpermissive \
+	-ffunction-sections -fdata-sections \
+	-flto -fno-fat-lto-objects \
+	-MMD -mmcu=atmega2560 \
+	-DF_CPU=16000000L -DARDUINO=10805 -DARDUINO_AVR_MEGA2560 -DARDUINO_ARCH_AVR \
+	-I$(LIB_SRC) -I$(LIB_CORE_SRC) -I$(LIB_VAR_SRC) -I$(EXTRA_INCLUDES)
+
+# Flags for C++ compilation
+CXXFLAGS := -c -g -Os -w -std=gnu++11 -fpermissive -fno-exceptions \
+	-ffunction-sections -fdata-sections -fno-threadsafe-statics \
+	-MMD -flto \
+	-mmcu=atmega2560 \
+	-DF_CPU=16000000L -DARDUINO=10805 -DARDUINO_AVR_MEGA2560 -DARDUINO_ARCH_AVR \
+	-I$(LIB_SRC) -I$(LIB_CORE_SRC) -I$(LIB_VAR_SRC) -I$(EXTRA_INCLUDES)
+
+.PHONY : clean all
+
+all:	$(PROJECT).a
+
+clean:
+	rm -f *.o *.d ethernet.a
+
+define ruletemp_S
+%.S.o: $(1)/%.S Makefile
+	# Assemble $<
+	$$(AVR_CC) $$(LDFLAGS) $$(CFLAGS) -MMD -MP -c $$< -o $$@
+endef
+
+define ruletemp_c
+%.c.o: $(1)/%.c Makefile
+	# Compile $<
+	$$(AVR_CC) $$(LDFLAGS) $$(CXXFLAGS) -MMD -MP -c $$< -o $$@
+endef
+
+define ruletemp_cpp
+%.cpp.o: $(1)/%.cpp Makefile
+	# Compile $<
+	$$(AVR_CXX) $$(LDFLAGS) $$(CXXFLAGS) -MMD -MP -c $$< -o $$@
+endef
+
+# Construct rules for main directory.
+$(eval $(call ruletemp_S, $(strip $(LIB_SRC))))
+$(eval $(call ruletemp_c, $(strip $(LIB_SRC))))
+$(eval $(call ruletemp_cpp, $(strip $(LIB_SRC))))
+
+# Construct rules for subdirectories.
+$(foreach subsrc,$(LIB_SRC_SUBDIRS),$(eval $(call ruletemp_S, $(strip $(LIB_SRC)/$(subsrc)))))
+$(foreach subsrc,$(LIB_SRC_SUBDIRS),$(eval $(call ruletemp_c, $(strip $(LIB_SRC)/$(subsrc)))))
+$(foreach subsrc,$(LIB_SRC_SUBDIRS),$(eval $(call ruletemp_cpp, $(strip $(LIB_SRC)/$(subsrc)))))
+
+$(PROJECT).a:	$(OBJECTS) 
+	$(AVR_AR) crv $(PROJECT).a $(OBJECTS)
+	$(AVR_RANLIB) $(PROJECT).a
+

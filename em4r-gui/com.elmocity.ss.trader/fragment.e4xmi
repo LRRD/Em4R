@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_Zh4UcL9sEee7bMs1IGYkSw">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_Z-D6IL9sEee7bMs1IGYkSw" featurename="children" parentElementId="com.elmocity.elib.main.partstack.debug">
+    <elements xsi:type="basic:Part" xmi:id="_ca-BcL9sEee7bMs1IGYkSw" elementId="com.elmocity.ss.trader.part.traderpart" contributionURI="bundleclass://com.elmocity.ss.trader/com.elmocity.ss.trader.parts.TraderPart" label="Trader Part"/>
+  </fragments>
+</fragment:ModelFragments>

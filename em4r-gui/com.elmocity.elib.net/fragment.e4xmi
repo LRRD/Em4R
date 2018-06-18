@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_DgjqwL9KEeeHRPkWnq3RGQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_EG21wL9KEeeHRPkWnq3RGQ" featurename="children" parentElementId="com.elmocity.elib.main.partstack.debug">
+    <elements xsi:type="basic:Part" xmi:id="_G7drYL9KEeeHRPkWnq3RGQ" elementId="com.elmocity.elib.net.part.udpserver" contributionURI="bundleclass://com.elmocity.elib.net/com.elmocity.elib.net.parts.UDPServerPart" label="UDP Server"/>
+    <elements xsi:type="basic:Part" xmi:id="_Mdtu0L9REeeHRPkWnq3RGQ" elementId="com.elmocity.elib.net.part.udpclient" contributionURI="bundleclass://com.elmocity.elib.net/com.elmocity.elib.net.parts.UDPClientPart" label="UDP Client"/>
+  </fragments>
+</fragment:ModelFragments>

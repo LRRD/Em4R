@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_h5dF8JZEEee-A5orY0XCIQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_clwzYKn7EeesKdMTVRG1ew" featurename="children" parentElementId="com.elmocity.elib.main.partstack.debug">
+    <elements xsi:type="basic:Part" xmi:id="_hIuBMKn7EeesKdMTVRG1ew" elementId="com.elmocity.elib.serial.part.elibserial" contributionURI="bundleclass://com.elmocity.elib.serial/com.elmocity.elib.serial.parts.SerialPart" label="ELib Serial" iconURI="platform:/plugin/com.elmocity.elib.swt/images/waiting.gif"/>
+  </fragments>
+</fragment:ModelFragments>

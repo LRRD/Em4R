@@ -1,0 +1,11 @@
+
+#define	CONFIG_PITCH	1
+#define	CONFIG_ROLL	1
+#define	CONFIG_PIPE	1
+#define	CONFIG_PIPE2	1
+#define	CONFIG_PUMP	1
+
+#define	CONFIG_LINK	1
+#define	CONFIG_LOG	0
+
+#define	CONFIG_SWITCHTEST	0

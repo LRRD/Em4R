@@ -1,0 +1,53 @@
+/*
+
+@import url("platform:/plugin/org.eclipse.ui.themes/css/e4-dark.css");
+
+*/
+
+.MPartStack {
+    swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
+	background-color: yellow green orange 20% 85%;
+}
+
+CTabItem:selected { 
+	font-weight: bold; 
+}
+
+CTabFolder {
+	padding: 8px 8px 8px 8px;
+ 	swt-unselected-tabs-color: #8888FF #DDDDFF 100%;
+ 
+	swt-maximize-visible: true;
+	swt-minimize-visible: true;
+	swt-tab-height: 24px;
+	 
+    swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
+	swt-outer-keyline-color: red;
+	swt-inner-keyline-color: blue;
+	swt-corner-radius: 12;
+	swt-selected-tab-fill: #DDDDFF;
+	swt-tab-outline: green;
+	swt-unselected-close-visible: true;
+	swt-unselected-image-visible: true;
+}
+
+CTabItem {
+	swt-show-close: true;
+}
+
+Shell {
+    background-color: #FFFF00;
+}
+
+.MTrimmedWindow {
+	background-color: #00FF00;
+}
+	
+.MTrimBar {
+	background-color: #9090CC;
+}
+
+.MDialog {
+	background-color: #FF90CC;
+}
+

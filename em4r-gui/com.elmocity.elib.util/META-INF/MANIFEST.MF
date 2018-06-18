@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Util
+Bundle-SymbolicName: com.elmocity.elib.util;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.elmocity.elib.util.Activator
+Bundle-Vendor: ELMOCITY
+Export-Package: com.elmocity.elib.util
+Require-Bundle: org.eclipse.ui,
+  org.eclipse.core.runtime,
+  org.eclipse.e4.ui.model.workbench;bundle-version="2.0.1.v20170713-1800",
+  org.eclipse.e4.core.di
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: javax.inject;version="1.0.0",
+  org.slf4j;version="1.7.2"
+Bundle-ActivationPolicy: lazy

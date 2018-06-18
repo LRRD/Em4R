@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_KHOR8LFCEeeYj94FO7_gXQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KpyzgLFCEeeYj94FO7_gXQ" featurename="children" parentElementId="com.elmocity.elib.main.partstack.debug">
+    <elements xsi:type="basic:Part" xmi:id="_OK8mELFCEeeYj94FO7_gXQ" elementId="com.elmocity.ss.broker.part.databrokerpart" contributionURI="bundleclass://com.elmocity.ss.broker/com.elmocity.ss.broker.parts.BrokerPart" label="Broker Part"/>
+    <elements xsi:type="basic:Part" xmi:id="_pgsb4LIWEeec6qS05lbfQQ" elementId="com.elmocity.ss.broker.part.brokerconid" contributionURI="bundleclass://com.elmocity.ss.broker/com.elmocity.ss.broker.parts.BrokerConIDPart" label="Broker ConID"/>
+  </fragments>
+</fragment:ModelFragments>

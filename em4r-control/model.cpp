@@ -171,7 +171,8 @@ model::model(const char* ip_addr_, uint16_t port_) :
 
 	// Wait for a reported clock.
 	printf("Waiting for response from model...\n");
-	wait_for_message();
+
+	//wait_for_message();
 	//printf("got it");
 }
 
@@ -198,7 +199,7 @@ void model::push_operator_control_move(std::vector<uint8_t>& v_, uint8_t instanc
 	push_i16_nbo(v_, requested_value_);
 	push_u8(v_, 1);	// move
 	push_u8(v_, 0);
-	
+	printf(v_);
 	push_u32_nbo(v_, relative_ms_);
 }
 

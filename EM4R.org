@@ -1,0 +1,108 @@
+* EM4R Operational Guide
+** Inner Workings/Components
+*** Core Parts
+**** Control Board
+     The first of the arduinos in the system.
+     is responsible for relaying information between
+     human interfaces and the driver control board.
+     Utilizes an ethernet adapter board, fitted with an SD card slot.
+**** Driver control board
+     The second arduino in the system.
+     Has the sole job of sending control information to the stepper
+     drivers (STP-DRV-6575 from SureStep), due to the high speeds required in order to keep up with
+     steps.
+**** Hand-Control
+     A wired controller that a user can utilize to manually jog
+     the operators.
+**** Control Server
+     This is the "linux box," whose purpose is to act as a "gateway" for user input and information output.
+     Past setups used a prebuilt industrial computer running an Ubuntu distrobution, but any linux device with
+     at least one ethernet interface will do. Controls are given using command line, so SSH access is necessary unless
+     connected to HID/display devices.
+**** Operators
+***** Pitch/Roll
+      Stepper motors that drive the pitch and
+      roll mechanisms. Driven by STP-DRV-6576 stepper drivers, controlled
+      by the Driver control board. Has limits based on simple limit switches,
+      several magnetic encoders, and tilt/gyro sensors.
+***** Flow
+      Shurflow pump, driven by a Critical Velocity SPD315 PWM driver, 
+      Controlled by the main Control Board.
+***** Pipe
+      Stepper motor, driven by stepper drivers, controlled by driver control
+      board. Has limits based off of simple limit switch (I.E. no encoding)
+*** Code/Logic
+    NOTE: code is written using the PIMPL (Pointer to Implementation)
+    guidelines.
+**** Control Board
+    The control board is the heart of the system, responsible for timekeeping,
+    command translation, and general IO.
+**** Driver Control Board
+    The driver control boards only task is to relay info from the control board to the stepper drivers
+    in a timely and loss free manner. The loop() function checks every 250usec (microseconds)
+    whether or not it has any commands in its buffer, then acts on those commands. After relaying the info, it
+    waits until 250usec has been achieved before it starts its next loop. This is done in order to keep steps in sync
+    and eliminate skipped steps.
+***** Communication functions
+      The driver control board recieves commands and sends status updates        
+      over its built in serial interface.
+      Status updates include the operator in question, the current position it is in
+      (in relation to the relevant value. degrees of pitch, millis/sec of flow, etc.).
+***** Driver functions
+      The driver board handles two types of controllers; "steppers" and "speeders"
+      Steppers are, as the name suggests, stepper drivers. These boards take two different
+      parameters; position and speed. the "speeder" in this project is the critical velocity pump driver,
+      which only takes one parameter; speed.
+      
+      
+
+
+*** Operational flow (walkthrough of operations)
+**** Foreword
+     It's hard to capture all of the modes of operation in this walkthrough, so I will
+     Be focusing on just simple move commands, issued via command line. The important 
+     thing to keep in mind is that everything outside of the main control board
+     is a user interface (whether it be command line, controller, etc.). Once the command
+     hits the control board, the operations are the same.
+***** Command line to Control Board
+      A command is issued to the control board from the control server. The control
+      server is called with '$em4r jog pitch 25 10'
+      The control server first initializes a connection to the control board over the
+      ethernet connection. If this is successful, it determines what mode to run in.
+      These options include the script function, home function, jog function, and verious
+      debugging functions. In this example we are using jog 
+      (the first argument passed to em4r)
+
+      The next parameter (after 'jog') is the operator that it to be modified/moved.
+      In this example, that operator is pitch. In the code, these operators are simple
+      integers, 0-3.
+
+      After the operator parameter, there are two more options; the value to jog to, and 
+      the time in which the operator should achieve that value. In our
+      example above, this is 25 degrees (positive pitch) over the course of 10 seconds.
+
+      The communication over the ethernet is a custom protocol, made by Chris Alix
+      for the project (described in udpserver.cpp) 
+      In a basic sense, it takes those three parameters mentioned above (operator, value, and time)
+      and packages them in packets in such a way that preserves packet integrity
+      (some fancy "magic number" related functions, that ensure packets all come out the same
+      they went in, size and all).
+
+***** 
+ 
+    
+** Potential Changes/Bugfixes
+*** Hardware
+**** Raspberry Pi control server
+     The control server in the past has been the orange linux box that we have in-house,
+     which was handy while it was also the development environment as well as the server,
+     but still overpowered for the task. A raspberry pi has served just fine as a server, and can be accessed over wifi
+     (with the right credentials, of course. It isn't open to the internet either, just local connections)
+     This allows for a lot more options when it comes to human input, cuts down on the cost of the server, and
+     might even be able to replace the arduino control board that issues commands to the driver control board.
+     
+     Another option mght be something like the ODroid-XU4, a single-board computer capable of octa-core processing
+     as well as the same basic capabilities that the Pi has as a single board computer. This board could replace ALL
+     of the control hardware, being able to recieve commands over the network, control PWM signals over its built in pins,
+     and handle stepper functionality (due to its multi-core processor).
+      

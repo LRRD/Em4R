@@ -9,7 +9,7 @@
 **** Driver control board
      The second arduino in the system.
      Has the sole job of sending control information to the stepper
-     drivers (STP-DRV-6575 from SureStep), due to the high speeds required in order to keep up with
+     drivers (STP-DRV-6575 from SureStep), due to the high speeds required in order to ensure that there are no skipped
      steps.
 **** Hand-Control
      A wired controller that a user can utilize to manually jog
@@ -28,15 +28,20 @@
 ***** Flow
       Shurflow pump, driven by a Critical Velocity SPD315 PWM driver, 
       Controlled by the main Control Board.
+      Flow will later be measured by a FM3001-PP Mag-meter by omega engineering
 ***** Pipe
       Stepper motor, driven by stepper drivers, controlled by driver control
       board. Has limits based off of simple limit switch (I.E. no encoding)
-*** Code/Logic
+*** Code/Logic/Pin-outs
     NOTE: code is written using the PIMPL (Pointer to Implementation)
     guidelines.
 **** Control Board
     The control board is the heart of the system, responsible for timekeeping,
     command translation, and general IO.
+***** Pins
+****** RX2 and TX2 (pins 19 and 18) connect boards together. RX1 and TX1 (pins 17 and 16) are FTDI debug ports
+
+****** I2C Expander (for megnatic encoders) is connected to pins 20 and 21 (SDA and SCL)
 **** Driver Control Board
     The driver control boards only task is to relay info from the control board to the stepper drivers
     in a timely and loss free manner. The loop() function checks every 250usec (microseconds)
@@ -52,8 +57,40 @@
       The driver board handles two types of controllers; "steppers" and "speeders"
       Steppers are, as the name suggests, stepper drivers. These boards take two different
       parameters; position and speed. the "speeder" in this project is the critical velocity pump driver,
-      which only takes one parameter; speed.
-      
+      which only takes one parameter; speed (PWM).
+***** Pins
+****** Pitch
+       - EN = 22
+       - DIR = 23
+       - STEP = 24
+       - FAULT = 25
+       - MIN_LIM = 26 
+       - MAX_LIM = 27
+****** Roll
+       - EN = 28
+       - DIR = 29
+       - STEP = 30
+       - FAULT = 31
+       - MIN_LIM = 32
+       - MAX_LIM = 33
+****** Pipe
+       - EN = 34
+       - DIR = 35
+       - STEP = 36
+       - FAULT = 37
+       - MIN_LIM = 38
+       - MAX_LIM = 39
+****** Pump
+       - EN = 2
+       - PWM = 3 
+****** Jog Controller         
+       - Roll/Pump+ = 42
+       - Roll/Pump- = 43
+       - Pitch/Pipe+ = 41
+       - Pitch/Pipe- = 40
+       - JogSwitch = 44
+       - GND = 46
+ 
       
 
 
@@ -63,13 +100,13 @@
      Be focusing on just simple move commands, issued via command line. The important 
      thing to keep in mind is that everything outside of the main control board
      is a user interface (whether it be command line, controller, etc.). Once the command
-     hits the control board, the operations are the same.
-***** Command line to Control Board
+     hits the control board, the operations are the same. The parentheses after headings denotes the relevant code found in the github repo.
+***** Command line to Control Board (em4r-command)
       A command is issued to the control board from the control server. The control
       server is called with '$em4r jog pitch 25 10'
       The control server first initializes a connection to the control board over the
       ethernet connection. If this is successful, it determines what mode to run in.
-      These options include the script function, home function, jog function, and verious
+      These options include the script function, home function, jog function, and various
       debugging functions. In this example we are using jog 
       (the first argument passed to em4r)
 
@@ -88,9 +125,24 @@
       (some fancy "magic number" related functions, that ensure packets all come out the same
       they went in, size and all).
 
-***** 
- 
-    
+***** Control Board to Driver board (em4r-hardware/em4rctrl)
+       One of the first things that the control board takes care of is the mapping of values between steps and measurements.
+       The user sends what I will refer to as "real" values, that is relatable to real life changes (eg. degrees, millimeters, milliliters/sec).
+       These values must first be converted into step values, or values that pertain to stepper motors. This is done by using built in tables that were written through experimentation and measurement.
+       At the same time, the control board also services the encoders using a similar system. The pitch/roll encoders output voltages from ~0-3V that are transnslated into hundreths of a degree using a simple min/max table
+       that is linearally extrapolated to account for the values in between. The other operators are translated in a similar vein, with minimum and maximum values corresponding to the steps/PWM required to hit those values.
+       There is some skeleton code for reading a magnetic flow meter, but it is yet unfinished, and may be replaced by a mag-meter/paddle-wheel hybrid.
+
+***** Driver Board to Steppers
+       The driver board is the workhorse of the system, handling everything to do with the measurement and movement of the stepper motors.
+       The driver board is constantly monitoring both the linear encoders, min/max limit switches, and the fault lines coming from the steppers. If any of these are outside their limits, the driver board ceases sending step commands
+       to the individual stepper driver in question.
+
+       Instead of just servicing the drivers whenever it receives commands, the driver board is actually always looping through a routine of checking for faults in the steppers, checking for changes, and sending said changes.
+       This is done on a 250 usec loop, in order to avoid missed steps and fault the motors. If a change in position command is given over serial, the driver board first enables the motor, checks to see if the movement is going
+       clockwise or counterclockwise, and passes along the desired value. Once That is determined, the min/max limits for movement are recorded, to ensure that the magnetic encoders stay within those bounds. The amount of steps required to
+       reach the desired value is calculated (based on a table), and those steps are sent off to the individual driver boards. 
+         
 ** Potential Changes/Bugfixes
 *** Hardware
 **** Raspberry Pi control server
@@ -104,5 +156,13 @@
      Another option mght be something like the ODroid-XU4, a single-board computer capable of octa-core processing
      as well as the same basic capabilities that the Pi has as a single board computer. This board could replace ALL
      of the control hardware, being able to recieve commands over the network, control PWM signals over its built in pins,
-     and handle stepper functionality (due to its multi-core processor).
-      
+     and handle stepper functionality (due to its multi-core processor). It could also lend itself to better floating point calculations, which could eliminate the need for calibration tables to translate encoder
+     values to pitch/roll degrees, using formulae instead.  
+*** Software      
+**** Encoder/Stepper translation
+     Due to the deadlines for the EM4R, the code written for translating real values to/from stepper/encoder values was done via lookup tables.
+     This is a solution, albeit not the best one, since there are so many values possible (technically). In the future, we should try to do these translations algorithmically, so long as the
+     control board has the processing power to do so.
+* Questions for Chris
+** Why random ports for UDP traffic? 
+   Why not have a set port for communication? It seems like the port is always changing, for no apparent reason. perhaps just a quick fix, or for expand-ability? 

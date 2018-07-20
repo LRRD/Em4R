@@ -2,11 +2,13 @@ PROGRAM=gcc
 
 em4r: main.cpp
 	g++ main.cpp model.cpp -o em4r
+	mkdir -p ~/Desktop/em4r_scripts
 
 install:
 	g++ main.cpp model.cpp -o /usr/bin/em4r
 	cp em4r_menu /usr/bin/em4r_menu
 	cp etch-a-sketch /usr/bin/etch-a-sketch
+	cp -rf em4r_scripts ~/Desktop/em4r_scripts
 	chmod 755 /usr/bin/em4r
 	chmod 755 /usr/bin/em4r_menu
 	chmod 755 /usr/bin/etch-a-sketch
@@ -18,4 +20,5 @@ remove:
 	rm -f /usr/bin/em4r	
 	rm -f /usr/bin/em4r_menu
 	rm -f /usr/bin/etch-a-sketch
+
 	
